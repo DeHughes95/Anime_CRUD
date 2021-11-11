@@ -5,15 +5,30 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anime Forum</title>
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="Anime_Crud.css">
     <script src="node_modules/jquery/dist/jquery.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
     <script src="Anime_Crud.js"></script>
 </head>
-<body class="container">
+<div class="header">
+    <h1>Anime Forum</h1>
+</div>
+<div id="new-topic" style="float:right" class="col-md-3">
+    <input type="text" id="new-topic" class="form-control" placeholder="New Topic">
+<button id="create-new-topic" class="btn btn-primary form-control">Create New Topic</button>
+</div>
+<br>
+<br>
 
-    <div id= "New Anime" class="show">
-        
-    </div>
+<body class="container">
+    <table id="listing" class="table table-striped">
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Replies</th>
+        </tr>
+    </table>
     
 </body>
 </html>

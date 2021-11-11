@@ -1,0 +1,18 @@
+.header {
+    padding: 40px; 
+    text-align: center;
+    position:top;
+    background-color: lightskyblue;
+}
+
+.container {
+background-color: rgb(99, 155, 212);
+}
+
+table {
+    width: 100%;
+}
+
+#new-topic {
+    
+}
