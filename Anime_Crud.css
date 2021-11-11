@@ -17,14 +17,24 @@ table {
     
 }
 
+/* table header width styling */
+
+#comment-col {
+    width: 5%;
+}
+
 #topic-col {
-    width: 60%;
+    width: 70%;
 }
 
 #replies-col {
-    width: 10%;
+    width: 5%;
 }
 
 #lastpost-col {
-    width: 40%;
+    width: 20%;
+}
+
+#edit-col {
+    width: 10%;
 }
