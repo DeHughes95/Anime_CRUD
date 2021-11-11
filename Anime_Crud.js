@@ -1,7 +1,7 @@
 // Primitives
 
 // CHANGE ME PER DAY AND CALL makeInitial() to populate!
-const baseUrl = "https://crudcrud.com/api/630f721a0b2449abb595eb3993b8c21a/";
+const baseUrl = "https://crudcrud.com/api/630f721a0b2449abb595eb3993b8c21a/AnimeForumPost";
 
 function myPost( url, stuff ) {
     return $.ajax( {
