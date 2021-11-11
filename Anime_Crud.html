@@ -14,21 +14,22 @@
 <div class="header">
     <h1>Anime Forum</h1>
 </div>
-<div id="new-topic" style="float:right" class="col-md-3">
-    <input type="text" id="new-topic" class="form-control" placeholder="New Topic">
-<button id="create-new-topic" class="btn btn-primary form-control">Create New Topic</button>
+<div class="row d-flex justify-content-end">
+    <div id="new-topic" class="col-md-3">
+        <input type="text" id="new-topic" class="form-control" placeholder="New Topic">
+        <button id="create-new-topic" class="btn btn-primary form-control">Create New Topic</button>
+    </div>
 </div>
-<br>
-<br>
-
 <body class="container">
-    <table id="listing" class="table table-striped">
-        <tr>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Replies</th>
-        </tr>
-    </table>
+    <div class="row">
+        <table id="listing" class="table table-striped">
+            <tr>
+                <th id="topic-col">Topic</th>
+                <th id="replies-col">Replies</th>
+                <th id="lastpost-col">Last Post</th>
+            </tr>
+        </table>
+    </div>
     
 </body>
 </html>

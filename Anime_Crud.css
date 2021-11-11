@@ -16,3 +16,15 @@ table {
 #new-topic {
     
 }
+
+#topic-col {
+    width: 60%;
+}
+
+#replies-col {
+    width: 10%;
+}
+
+#lastpost-col {
+    width: 40%;
+}
