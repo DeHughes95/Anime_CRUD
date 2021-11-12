@@ -26,8 +26,8 @@ function myPut( url, stuff ) {
 
 function makeInitial() {
     let post1 = new NewTopic( "I believe Steins:Gate is the best non-action Anime", new Date().toISOString().substring( 0,10 ) );
-    let comment1 = new Comment( "I would agree but it may be to slow and dialogue based for some.", new Date().toISOString().substring( 0,10 ) );
-    post1.push( comment1 );
+    let comment1 = new Comment( "I would agree but it may be to slow and dialogue based for some.", "Dehughes", new Date().toISOString().substring( 0,10 ) );
+    post1.comments.push( comment1 );
     console.log( post1 );
     myPost( baseUrl, post1 )
     .then( ( resp ) => console.log( resp ) );
@@ -135,7 +135,7 @@ class DOMManager {
     }
 }
 
-//$( () => {
+$( () => {
     //call getAllTopics()
-   // DOMManager.getAllTopics();
-//});
+    DOMManager.getAllTopics();
+   });
