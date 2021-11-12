@@ -1,7 +1,7 @@
 // Primitives
 
 // CHANGE ME PER DAY AND CALL makeInitial() to populate!
-const baseUrl = "https://crudcrud.com/api/630f721a0b2449abb595eb3993b8c21a/AnimeForumPost";
+const baseUrl = "https://crudcrud.com/api/630f721a0b2449abb595eb3993b8c21a/animeforumpost";
 
 function myPost( url, stuff ) {
     return $.ajax( {
@@ -45,9 +45,96 @@ class NewTopic {
 }
 
 class Comment {
-    constructor( content, name, date ) {
+    constructor( content, user, date ) {
         this.content = content;
-        this.name = name;
+        this.user = user;
         this.date = date;
     }
 }
+
+class ForumService {
+
+    static getAllTopics() {
+        return $.get( baseUrl );
+    }
+}
+
+class DOMManager {
+    static topics; // JSON array of literal objects
+
+    static getAllTopics() {
+        ForumService.getAllTopics().then(
+            (topics) => this.render( topics )
+        );
+    }
+
+    static createTopic( name , date ) {
+
+    }
+
+    static deleteTopic( id ) {
+
+    }
+
+    static render( topics ) { // topics is an array of literal objects returned by the API call
+        this.topics = topics;
+        let listing = $( "listing" );
+        listing.empty();
+
+        for( let topicIdx in this.topics ) {
+            let topic = this.topics[ topicIdx ];
+            let topicRow = $(`
+            <div idx='${topicIdx}'>
+                <tr>
+                    <td>${topicIdx + 1}</td>
+                    <td>${topic.name}</td>
+                    <td>${topic.replies}</td>
+                    <td>${topic.date}</td>
+                    <td>
+                        <div class='btn-group'>
+                            <button type='button' class='btn btn-secondary dropdown-toggle btn-sm' data-bs-toggle='dropdown'>Edit</button>
+                            <div class='dropdown-menu'>
+                                <a href='#' class='dropdown-item' id='add-comment' onclick='#(); return false;'>Comment</a>
+                                <a href='#' class='dropdown-item' id='delete-topic-${topic._id}' onclick='#(); return false;'>Delete Topic</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </div>`
+            );
+
+            listing.append( topicRow );
+            
+            for( let cmntIdx in topic.comments ) {
+                let comment = topic.comments[ cmntIdx ];
+                let commentRow = $(`
+                <div idx='${cmntIdx}'>
+                    <tr>
+                        <td>Comment ${cmntIdx + 1}:</td>
+                        <td colspan='2'>${comment.content}</td>
+                        <td>by: ${comment.user} >> ${comment.date}</td>
+                        <td>
+                        <div class='btn-group'>
+                            <button type='button' class='btn btn-secondary dropdown-toggle btn-sm' data-bs-toggle='dropdown'>Edit</button>
+                            <div class='dropdown-menu'>
+                                <a href='#' class='dropdown-item' id='edit-comment-${comment._id}' onclick='#(); return false;'>Edit Comment</a>
+                                <a href='#' class='dropdown-item' id='delete-comment-${comment._id}' onclick='#(); return false;'>Delete Comment</a>
+                            </div>
+                        </div>
+                        </td>
+                    </tr>
+                </div>
+                `);
+            }
+
+            listing.append( commentRow );
+        }
+
+        
+    }
+}
+
+//$( () => {
+    //call getAllTopics()
+   // DOMManager.getAllTopics();
+//});
