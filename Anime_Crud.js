@@ -62,24 +62,45 @@ class ForumService {
 class DOMManager {
     static topics; // JSON array of literal objects
 
+    // Read Function
     static getAllTopics() {
         ForumService.getAllTopics().then(
             (topics) => this.render( topics )
         );
     }
 
-    static createTopic( name , date ) {
-
+    // Create Function
+    static createTopic( name , date) {
+        ForumService.createTopic(new Topic(name, date)).then(() => {
+            return ForumService.getAllTopics();
+        })
+        .then((topics) => this.render(topics));
     }
 
-    static deleteTopic( id ) {
+    // Update Function
+    static updateTopic( id ) {
+        ForumService.updateTopic(id).then(() => {
+            return ForumService.getAllTopics();
+        })
+        .then((topics) => this.render(topics));
+    }
 
+    // Delete Function
+    static deleteTopic( id ) {
+        ForumService.deleteTopic(id).then(() => {
+        return ForumService.getAllTopics();
+        })
+        .then((topics) => this.render(topics));
     }
 
     static render( topics ) { // topics is an array of literal objects returned by the API call
         this.topics = topics;
         let listing = $( "listing" );
         listing.empty();
+        for (let topic of topics) {
+            $('#listing').append(
+                '<th>Topic</th>');
+            }                
 
         for( let topicIdx in this.topics ) {
             let topic = this.topics[ topicIdx ];
