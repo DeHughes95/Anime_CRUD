@@ -125,12 +125,13 @@ class DOMManager {
                     </tr>
                 </div>
                 `);
+
+                listing.append( commentRow );
+
             }
 
-            listing.append( commentRow );
         }
 
-        
     }
 }
 
