@@ -65,6 +65,13 @@ class ForumService {
         });
     }
 
+    static deleteComment( topicId, topicLO, cmntIdx ) {
+        let topic = { ...topicLO };
+        delete topic._id;
+        delete topic.comments[cmntIdx];
+        return myPut( baseUrl + `/${topicId}`, topic);
+    }
+
     static createTopic( name, date ) {
         let newTopic = new Topic( name, date );
         return myPost( baseUrl, newTopic);
@@ -101,12 +108,21 @@ class DOMManager {
         .then( (topics) => this.render(topics) );
     }
 
-    // Delete  Topic Function
+    // Delete Topic Function
     static deleteTopic( id ) {
         ForumService.deleteTopic(id).then( () => {
         return ForumService.getAllTopics();
         })
         .then( (topics) => this.render(topics) );
+    }
+
+    // Delete Comment Function
+    static deleteComment( topicId, topicIdx, cmntIdx){
+        ForumService.deleteComment( topicId, this.topics[ topicIdx ], cmntIdx )
+        .then( () => {
+            return ForumService.getAllTopics();
+        })
+        .then( (topics) => this.render( topics ) );
     }
 
     //Function grabs id from button dropdown when pressed and calls deleteTopic()
@@ -115,10 +131,16 @@ class DOMManager {
         DOMManager.deleteTopic( id );
     }
 
-    //working on this
+    //Gets indexs of comment to pass to deleteComment()
     static deleteCommentBtn( tIdx, cIdx ){
         let id = $(`#listing tr[idx=topic-${tIdx}-comment-${cIdx}]`).find("a[id*='delete-comment']").attr('id').split("-")[ 2 ];
-        
+        DOMManager.deleteComment( id, tIdx, cIdx );
+    }
+
+    //Gets index of comment to editComment() WORKING ON THIS!!!
+    static editCommentBtn( tIdx, cIdx ) {
+        let id = $(`#listing tr[idx=topic-${tIdx}-comment-${cIdx}]`).find("a[id*='edit-comment']").attr('id').split("-")[ 2 ];
+        DOMManager.editComment();
     }
 
 
@@ -171,7 +193,7 @@ class DOMManager {
                         <div class='btn-group'>
                             <button type='button' class='btn btn-secondary dropdown-toggle btn-sm' data-bs-toggle='dropdown'>Edit</button>
                             <div class='dropdown-menu'>
-                                <a href='#' class='dropdown-item' id='edit-comment-${topic._id}' onclick='#(); return false;'>Edit Comment</a>
+                                <a href='#' class='dropdown-item' id='edit-comment-${topic._id}' onclick='DOMManager.editCommentBtn( ${topicIdx}, ${cmntIdx} ); return false;'>Edit Comment</a>
                                 <a href='#' class='dropdown-item' id='delete-comment-${topic._id}' onclick='DOMManager.deleteCommentBtn( ${topicIdx}, ${cmntIdx} ); return false;'>Delete Comment</a>
                             </div>
                         </div>
@@ -182,6 +204,40 @@ class DOMManager {
 
             }
         }
+
+        //Add New Topic
+        let addTopicBtn = $( "<button class='btn btn-primary' id='create-new-topic'>Create New Topic</button>" );
+        let newTopicRow = $( `
+            <div class='form-row' id='add-topic-row'>
+                <div class='col-8'>
+                    <input type='text' id='new-topic-name' class='form-control' placeholder='Topic'>
+                </div>
+                <div class='col-2 text-center'>
+                    <button class='btn btn-success' id='final-post-topic-btn'>Post</button>
+                </div>
+                <div> class='col-2'>
+                    <button class='btn btn-warning' id='add-topic-cancel'>Cancel</button>
+                </div>
+            </div>
+        `).hide();
+
+        addTopicBtn.on("click", function( e ) {
+            $( this ).hide();
+            newTopicRow.show();
+            e.preventDefault();
+        });
+
+        $("#new-topic-form").append( addTopicBtn );
+        $("#new-topic-form").append( newTopicRow );
+        $("#create-new-topic").on("click", function( e ) {
+            newTopicRow.hide();
+            addTopicBtn.show();
+            e.preventDefault();
+        });
+
+
+
+
     }
 }
 
