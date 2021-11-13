@@ -77,8 +77,27 @@ class ForumService {
         return myPost( baseUrl, newTopic);
     }
 
-    static editComment() {
+    static createComment( topicId, topicLO ) {
+        let topic = { ...topicLO };
+        delete topic._id;
+        return myPut( baseUrl + `/${topicId}`, topic);
+    }
 
+    static editTopic(topicId, topicLO, newName, newDate ) {
+        let topic = { ...topicLO };
+        delete topic._id;
+        topic.name = newName;
+        topic.date = newDate;
+        return myPut( baseUrl + `/${topicId}`, topic);
+    }
+
+    static editComment( topicId, topicLO, cmntIdx, newContent, newUser, newDate) {
+        topicLO.comments[ cmntIdx ].content = newContent;
+        topicLO.comments[ cmntIdx ].user = newUser;
+        topicLO.comments[ cmntIdx ].date = newDate;
+        let topic = { ... topicLO };
+        delete topic._id;
+        return myPut( baseUrl + `/${topicId}`, topic);
     }
 }
 
@@ -94,18 +113,30 @@ class DOMManager {
 
     // Create Topic Function
     static createTopic( name, date ) {
-        ForumService.createTopic( new Topic(name, date) ).then( () => {
+        ForumService.createTopic( name, date ).then( () => {
             return ForumService.getAllTopics();
         })
-        .then( (topics) => this.render(topics) );
+        .then( (topics) => this.render( topics ) );
     }
 
-    // Update Topic Function
-    static updateTopic( id ) {
-        ForumService.updateTopic(id).then( () => {
+    // Create Comment Function
+    static createComment( topicId, topicIdx, content, user, date){
+        let newComment = new Comment( content, user, date );
+        this.topics[topicIdx].comments.push(newComment);
+        ForumService.createComment( topicId, this.topics[topicIdx] ).then( () => {
             return ForumService.getAllTopics();
         })
-        .then( (topics) => this.render(topics) );
+        .then( (topics) => this.render( topics ) );
+    }
+    
+
+
+    // Update Topic Function
+    static editTopic( id, topicIdx, newName, newDate ) {
+        ForumService.editTopic( id, this.topics[ topicIdx ], newName, newDate ).then( () => {
+            return ForumService.getAllTopics();
+        })
+        .then( (topics) => this.render( topics ) );
     }
 
     // Delete Topic Function
@@ -125,6 +156,15 @@ class DOMManager {
         .then( (topics) => this.render( topics ) );
     }
 
+    // Edit Comment Function
+    static editComment(topicId, topicIdx, cmntIdx, newContent, newUser, newDate){
+        ForumService.editComment( topicId, this.topics[ topicIdx ], cmntIdx, newContent, newUser, newDate ).then( () => {
+            return ForumService.getAllTopics();
+        })
+        .then( (topics) => this.render( topics ) );
+    }
+    
+
     //Function grabs id from button dropdown when pressed and calls deleteTopic()
     static deleteTopicBtn( idx ) {
         let id = $(`#listing tr[idx=topic-${idx}]`).find("a[id*='delete-topic']").attr('id').split("-")[ 2 ];
@@ -137,10 +177,119 @@ class DOMManager {
         DOMManager.deleteComment( id, tIdx, cIdx );
     }
 
-    //Gets index of comment to editComment() WORKING ON THIS!!!
+    //Take in user info to create a comment and pass to createComment()
+    static createCommentBtn( tIdx ) {
+        let id = $(`#listing tr[idx=topic-${tIdx}]`).find("a[id*='create-comment']").attr('id').split("-")[ 2 ];
+        let createComment = $(`
+        <div class='form-row' id='create-comment-row'>
+                <div class='col-8'>
+                    <input type='text' id='create-comment-content' class='form-control' placeholder='New Comment'>
+                </div>
+                <div class='col-8'>
+                    <input type='text' id='new-user' class='form-control' placeholder='Enter Username'>
+                </div>
+                <div class='col-2 text-center'>
+                    <button class='btn btn-success' id='final-create-comment-btn'>Submit</button>
+                </div>
+                <div class='col-2'>
+                    <button class='btn btn-warning' id='create-comment-cancel'>Cancel</button>
+                </div>
+        </div>
+        `);
+
+        $( "#edit-info" ).append( createComment );
+
+        $( "#final-create-comment-btn" ).on( "click", function( e ) {
+            let content = $( "#create-comment-content").val();
+            let user = $( "#new-user").val();
+            let date = new Date().toISOString().substring( 0,10 );
+            if ( !!content ){
+                DOMManager.createComment( id, tIdx, content, user, date );
+            }
+            e.preventDefault();
+        });
+
+        $("#create-comment-cancel").on("click", function( e ) {
+            $( "#create-comment-content" ).val( "" );
+            createComment.hide();
+            e.preventDefault();
+        });
+    }
+
+
+    //Gets index of comment to editComment() and pass new info
     static editCommentBtn( tIdx, cIdx ) {
         let id = $(`#listing tr[idx=topic-${tIdx}-comment-${cIdx}]`).find("a[id*='edit-comment']").attr('id').split("-")[ 2 ];
-        DOMManager.editComment();
+        let editText = $(`
+        <div class='form-row' id='edit-comment-row'>
+                <div class='col-8'>
+                    <input type='text' id='edit-comment-content' class='form-control' placeholder='New Comment'>
+                </div>
+                <div class='col-8'>
+                    <input type='text' id='edit-user' class='form-control' placeholder='New Username'>
+                </div>
+                <div class='col-2 text-center'>
+                    <button class='btn btn-success' id='final-edit-comment-btn'>Submit</button>
+                </div>
+                <div class='col-2'>
+                    <button class='btn btn-warning' id='edit-comment-cancel'>Cancel</button>
+                </div>
+        </div>
+        `);
+
+        $( "#edit-info" ).append( editText );
+
+        $( "#final-edit-comment-btn" ).on( "click", function( e ) {
+            let content = $( "#edit-comment-content").val();
+            let user = $( "#edit-user").val();
+            let date = new Date().toISOString().substring( 0,10 );
+            if ( !!content ){
+                DOMManager.editComment( id, tIdx, cIdx, content, user, date );
+            }
+            e.preventDefault();
+        });
+
+        $("#edit-comment-cancel").on("click", function( e ) {
+            $( "#edit-comment-name" ).val( "" );
+            editText.hide();
+            e.preventDefault();
+        });
+    }
+
+    //Get index of the topic to editTopic() and pass in new info
+    static editTopicBtn( idx ) {
+        let id = $(`#listing tr[idx=topic-${idx}]`).find("a[id*='edit-topic']").attr('id').split("-")[ 2 ];
+        let editText = $(`
+        <div class='form-row' id='edit-topic-row'>
+                <div class='col-8'>
+                    <input type='text' id='edit-topic-name' class='form-control' placeholder='New Topic'>
+                </div>
+                <div class='col-2 text-center'>
+                    <button class='btn btn-success' id='final-edit-post-topic-btn'>Post</button>
+                </div>
+                <div class='col-2'>
+                    <button class='btn btn-warning' id='edit-topic-cancel'>Cancel</button>
+                </div>
+        </div>
+        `);
+
+        $( "#edit-info" ).append( editText );
+
+        $( "#final-edit-post-topic-btn" ).on( "click", function( e ) {
+            let name = $( "#edit-topic-name").val();
+            let date = new Date().toISOString().substring( 0,10 );
+            if ( !!name ){
+                DOMManager.editTopic( id, idx, name, date );
+            }
+            e.preventDefault();
+        });
+
+        $("#edit-topic-cancel").on("click", function( e ) {
+            $( "#edit-topic-name" ).val( "" );
+            editText.hide();
+            e.preventDefault();
+        });
+    
     }
 
 
@@ -148,6 +297,7 @@ class DOMManager {
         this.topics = topics;
         let listing = $( "#listing" );
         listing.empty();
+        $("#new-topic-form").empty();
 
         //this will render our <th>'s every time we render
         listing.append(`
@@ -173,7 +323,8 @@ class DOMManager {
                         <div class='btn-group'>
                             <button type='button' class='btn btn-secondary dropdown-toggle btn-sm' data-bs-toggle='dropdown'>Edit</button>
                             <div class='dropdown-menu'>
-                                <a href='#' class='dropdown-item' id='add-comment' onclick='#(); return false;'>Comment</a>
+                                <a href='#' class='dropdown-item' id='create-comment-${topic._id}' onclick='DOMManager.createCommentBtn( ${topicIdx} ); return false;'>Comment</a>
+                                <a href='#' class='dropdown-item' id='edit-topic-${topic._id}' onclick='DOMManager.editTopicBtn( ${topicIdx} ); return false;'>Edit Topic</a>
                                 <a href='#' class='dropdown-item' id='delete-topic-${topic._id}' onclick='DOMManager.deleteTopicBtn( ${topicIdx} ); return false;'>Delete Topic</a>
                             </div>
                         </div>
@@ -215,8 +366,8 @@ class DOMManager {
                 <div class='col-2 text-center'>
                     <button class='btn btn-success' id='final-post-topic-btn'>Post</button>
                 </div>
-                <div> class='col-2'>
-                    <button class='btn btn-warning' id='add-topic-cancel'>Cancel</button>
+                <div class='col-2'>
+                    <button class='btn btn-warning' id='create-topic-cancel'>Cancel</button>
                 </div>
             </div>
         `).hide();
@@ -229,9 +380,18 @@ class DOMManager {
 
         $("#new-topic-form").append( addTopicBtn );
         $("#new-topic-form").append( newTopicRow );
-        $("#create-new-topic").on("click", function( e ) {
+        $("#create-topic-cancel").on("click", function( e ) {
+            $( "#new-topic-name" ).val( "" );
             newTopicRow.hide();
             addTopicBtn.show();
+            e.preventDefault();
+        });
+        $( "#final-post-topic-btn" ).on( "click", function( e ) {
+            let name = $( "#new-topic-name").val();
+            let date = new Date().toISOString().substring( 0,10 );
+            if ( !!name ){
+                DOMManager.createTopic( name, date );
+            }
             e.preventDefault();
         });
 
