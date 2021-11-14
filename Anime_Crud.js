@@ -68,7 +68,6 @@ class ForumService {
     static deleteComment( topicId, topicLO, cmntIdx ) {
         let topic = { ...topicLO };
         delete topic._id;
-        delete topic.comments[cmntIdx];
         return myPut( baseUrl + `/${topicId}`, topic);
     }
 
@@ -121,9 +120,11 @@ class DOMManager {
 
     // Create Comment Function
     static createComment( topicId, topicIdx, content, user, date){
+        let currentTopic = this.topics[topicIdx];
+        currentTopic.replies = currentTopic.replies + 1;
         let newComment = new Comment( content, user, date );
-        this.topics[topicIdx].comments.push(newComment);
-        ForumService.createComment( topicId, this.topics[topicIdx] ).then( () => {
+        currentTopic.comments.push(newComment);
+        ForumService.createComment( topicId, currentTopic ).then( () => {
             return ForumService.getAllTopics();
         })
         .then( (topics) => this.render( topics ) );
@@ -149,7 +150,10 @@ class DOMManager {
 
     // Delete Comment Function
     static deleteComment( topicId, topicIdx, cmntIdx){
-        ForumService.deleteComment( topicId, this.topics[ topicIdx ], cmntIdx )
+        let currentTopic = this.topics[ topicIdx ];
+        currentTopic.replies = currentTopic.replies - 1;
+        currentTopic.comments.splice(cmntIdx, 1);
+        ForumService.deleteComment( topicId, currentTopic, cmntIdx )
         .then( () => {
             return ForumService.getAllTopics();
         })
@@ -188,11 +192,13 @@ class DOMManager {
                 <div class='col-8'>
                     <input type='text' id='new-user' class='form-control' placeholder='Enter Username'>
                 </div>
-                <div class='col-2 text-center'>
-                    <button class='btn btn-success' id='final-create-comment-btn'>Submit</button>
-                </div>
-                <div class='col-2'>
-                    <button class='btn btn-warning' id='create-comment-cancel'>Cancel</button>
+                <div class='row'>
+                    <div class='col-6 text-center d-flex justify-content-start'>
+                        <button class='btn btn-success' id='final-create-comment-btn'>Submit</button>
+                    </div>
+                    <div class='col-6'>
+                        <button class='btn btn-warning' id='create-comment-cancel'>Cancel</button>
+                    </div>
                 </div>
         </div>
         `);
@@ -203,7 +209,7 @@ class DOMManager {
             let content = $( "#create-comment-content").val();
             let user = $( "#new-user").val();
             let date = new Date().toISOString().substring( 0,10 );
-            if ( !!content ){
+            if ( !!content && !!user ){
                 DOMManager.createComment( id, tIdx, content, user, date );
             }
             e.preventDefault();
@@ -228,11 +234,13 @@ class DOMManager {
                 <div class='col-8'>
                     <input type='text' id='edit-user' class='form-control' placeholder='New Username'>
                 </div>
-                <div class='col-2 text-center'>
-                    <button class='btn btn-success' id='final-edit-comment-btn'>Submit</button>
-                </div>
-                <div class='col-2'>
-                    <button class='btn btn-warning' id='edit-comment-cancel'>Cancel</button>
+                <div class='row'>
+                    <div class='col-6 text-center d-flex justify-content-start'>
+                        <button class='btn btn-success' id='final-edit-comment-btn'>Submit</button>
+                    </div>
+                    <div class='col-6'>
+                        <button class='btn btn-warning' id='edit-comment-cancel'>Cancel</button>
+                    </div>
                 </div>
         </div>
         `);
@@ -243,7 +251,7 @@ class DOMManager {
             let content = $( "#edit-comment-content").val();
             let user = $( "#edit-user").val();
             let date = new Date().toISOString().substring( 0,10 );
-            if ( !!content ){
+            if ( !!content && !!user ){
                 DOMManager.editComment( id, tIdx, cIdx, content, user, date );
             }
             e.preventDefault();
@@ -264,11 +272,13 @@ class DOMManager {
                 <div class='col-8'>
                     <input type='text' id='edit-topic-name' class='form-control' placeholder='New Topic'>
                 </div>
-                <div class='col-2 text-center'>
-                    <button class='btn btn-success' id='final-edit-post-topic-btn'>Post</button>
-                </div>
-                <div class='col-2'>
-                    <button class='btn btn-warning' id='edit-topic-cancel'>Cancel</button>
+                <div class='row'>
+                    <div class='col-6 text-center d-flex justify-content-start'>
+                        <button class='btn btn-success' id='final-edit-post-topic-btn'>Post</button>
+                    </div>
+                    <div class='col-6'>
+                        <button class='btn btn-warning' id='edit-topic-cancel'>Cancel</button>
+                    </div>
                 </div>
         </div>
         `);
@@ -298,6 +308,7 @@ class DOMManager {
         let listing = $( "#listing" );
         listing.empty();
         $("#new-topic-form").empty();
+        $("#edit-info").empty();
 
         //this will render our <th>'s every time we render
         listing.append(`
@@ -358,16 +369,18 @@ class DOMManager {
 
         //Add New Topic
         let addTopicBtn = $( "<button class='btn btn-primary' id='create-new-topic'>Create New Topic</button>" );
-        let newTopicRow = $( `
+        let newTopicRow = $(`
             <div class='form-row' id='add-topic-row'>
                 <div class='col-8'>
                     <input type='text' id='new-topic-name' class='form-control' placeholder='Topic'>
                 </div>
-                <div class='col-2 text-center'>
-                    <button class='btn btn-success' id='final-post-topic-btn'>Post</button>
-                </div>
-                <div class='col-2'>
-                    <button class='btn btn-warning' id='create-topic-cancel'>Cancel</button>
+                <div class='row'>
+                    <div class='col-5 text-center d-flex justify-content-start'>
+                        <button class='btn btn-success' id='final-post-topic-btn'>Post</button>
+                    </div>
+                    <div class='col-5'>
+                        <button class='btn btn-warning' id='create-topic-cancel'>Cancel</button>
+                    </div>
                 </div>
             </div>
         `).hide();
@@ -405,3 +418,7 @@ $( () => {
     //call getAllTopics()
     DOMManager.getAllTopics();
    });
+
+
+// bugs that need to be squashed 
+// - when edit buttons that contains a form field is brought up then canceled and brought up again it can not be canceled a second time
